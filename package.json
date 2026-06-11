@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node index.js",
     "test": "node test/logic.test.js",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "server": "node server.js"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
