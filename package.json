@@ -1,0 +1,17 @@
+{
+  "name": "solo-shopify-finder",
+  "version": "1.0.0",
+  "description": "Finds and ranks US Shopify stores that look like they're run by a single person",
+  "type": "module",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test/logic.test.js",
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0"
+  }
+}
