@@ -2,10 +2,13 @@ import { readFileSync, writeFileSync, existsSync, appendFileSync } from 'node:fs
 import { load } from 'cheerio';
 import { get } from './lib/http.js';
 
+// Bing returns zero results whenever a `-site:` exclusion is combined with
+// multiple quoted phrases, so these rely on the post-fetch domain blacklist
+// instead of search-side site filters.
 const QUERIES = [
-  '"powered by shopify" "handmade" "i make" clothing site:.com -site:.ca -site:.uk',
-  '"powered by shopify" "i sew" "handmade" clothing site:.com -site:.ca -site:.uk',
-  '"powered by shopify" "one woman" clothing brand site:.com -site:.ca -site:.uk',
+  '"powered by shopify" "handmade" "i make" clothing',
+  '"powered by shopify" "i sew" "handmade" clothing',
+  '"powered by shopify" "one woman" clothing brand',
 ];
 
 const QUERY_GAP_MS = 3000;
