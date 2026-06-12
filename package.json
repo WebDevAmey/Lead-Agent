@@ -10,7 +10,8 @@
     "start": "node index.js",
     "test": "node test/logic.test.js",
     "seed": "node seed.js",
-    "server": "node server.js"
+    "server": "node server.js",
+    "dashboard": "cd dashboard && npm run dev"
   },
   "dependencies": {
     "cheerio": "^1.2.0",
