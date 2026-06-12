@@ -9,7 +9,21 @@ const QUERIES = [
   '"powered by shopify" "handmade" "i make" clothing',
   '"powered by shopify" "i sew" "handmade" clothing',
   '"powered by shopify" "one woman" clothing brand',
+  '"powered by shopify" "i make" "handmade" "founded by" inurl:pages/about',
+  '"powered by shopify" "handmade" "i sew" clothing site:.com',
+  '"powered by shopify" "one woman" clothing brand site:.com',
+  '"powered by shopify" "i design" "small batch" apparel site:.com',
+  `"powered by shopify" "hi i'm" "i make" jewelry site:.com`,
+  '"powered by shopify" "just me" "handmade" accessories site:.com',
+  '"powered by shopify" "i started" "handmade" "founded by" site:.com',
+  '"powered by shopify" "meet the maker" clothing site:.com',
+  '"powered by shopify" "i hand" "small business" apparel site:.com',
+  '"powered by shopify" "made by me" clothing boutique site:.com',
+  '"powered by shopify" "i create" "handmade" women site:.com',
+  '"powered by shopify" "solopreneur" clothing site:.com',
 ];
+
+const VERIFY_GAP_MS = 300;
 
 const QUERY_GAP_MS = 3000;
 const INPUT_FILE = 'input.txt';
@@ -98,6 +112,14 @@ function sleep(ms) {
   return new Promise(r => setTimeout(r, ms));
 }
 
+// Lightweight bulk-filter check — a single attempt is enough to tell
+// real Shopify stores (which always serve /products.json) apart from
+// the many unrelated domains search results turn up.
+async function isShopifyDomain(domain) {
+  const res = await get(`https://${domain}/products.json?limit=250`, 1);
+  return !!(res?.json?.products && Array.isArray(res.json.products));
+}
+
 // ── main ──
 const queryFlagIndex = process.argv.indexOf('--query');
 const queries = queryFlagIndex !== -1 ? [process.argv[queryFlagIndex + 1]] : QUERIES;
@@ -115,10 +137,17 @@ for (let i = 0; i < queries.length; i++) {
 
   for (const domain of domains) {
     allFound.add(domain);
-    if (!existing.has(domain) && !newDomains.includes(domain)) {
+    if (existing.has(domain) || newDomains.includes(domain)) continue;
+
+    const verified = await isShopifyDomain(domain);
+    if (verified) {
+      console.log(`  ✓ verified shopify: ${domain}`);
       newDomains.push(domain);
       existing.add(domain);
+    } else {
+      console.log(`  ✗ not shopify: ${domain}`);
     }
+    await sleep(VERIFY_GAP_MS);
   }
 
   if (i < queries.length - 1) await sleep(QUERY_GAP_MS);

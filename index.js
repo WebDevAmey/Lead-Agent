@@ -84,6 +84,7 @@ async function processRow(row) {
     tiktok: signals.tiktok,
     contact_form_url: signals.contactFormUrl,
     contact_url: signals.contactUrl,
+    compliment: signals.compliment,
   });
 }
 

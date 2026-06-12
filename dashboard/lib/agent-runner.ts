@@ -33,7 +33,8 @@ export function startAgent(): { started: boolean; error?: string } {
   }
 
   const cwd = path.join(process.cwd(), "..");
-  const child = spawn("npm", ["start"], { cwd });
+  // Full loop: seed new domains first, then score/enrich everything pending.
+  const child = spawn("sh", ["-c", "node seed.js && node index.js"], { cwd });
   state.process = child;
   broadcast("__START__");
 

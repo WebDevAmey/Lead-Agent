@@ -10,6 +10,8 @@
     "start": "node index.js",
     "test": "node test/logic.test.js",
     "seed": "node seed.js",
+    "schedule": "node scheduler.js",
+    "backfill-compliments": "node backfill-compliments.js",
     "dashboard": "cd dashboard && npm run dev"
   },
   "dependencies": {

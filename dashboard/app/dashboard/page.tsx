@@ -12,10 +12,10 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Mail, Search, Play, Loader2 } from "lucide-react";
+import { Mail, Search, Play, Loader2, Check, Reply, X as XIcon } from "lucide-react";
 import { InstagramIcon, LinkedinIcon } from "@/components/icons";
 import { RunDrawer } from "@/components/run-drawer";
-import type { Lead } from "@/lib/leads-db";
+import type { Lead, OutreachRow } from "@/lib/leads-db";
 
 interface Stats {
   total: number;
@@ -28,6 +28,7 @@ interface Stats {
 }
 
 type FilterMode = "all" | "email" | "instagram" | "top";
+type OutreachFilter = "all" | "not_contacted" | "sent" | "replied";
 
 function asUrl(value: string | null) {
   if (!value) return null;
@@ -46,6 +47,13 @@ function StatusBadge({ status }: { status: string | null }) {
   return <Badge variant="warning">pending</Badge>;
 }
 
+function OutreachBadge({ status }: { status: string }) {
+  if (status === "sent") return <Badge variant="warning">sent</Badge>;
+  if (status === "replied") return <Badge variant="success">replied</Badge>;
+  if (status === "not_interested") return <Badge variant="destructive">skipped</Badge>;
+  return <Badge variant="default">not contacted</Badge>;
+}
+
 function StatCard({ label, value }: { label: string; value: string | number }) {
   return (
     <Card>
@@ -59,17 +67,33 @@ function StatCard({ label, value }: { label: string; value: string | number }) {
   );
 }
 
+const OUTREACH_TABS: { value: OutreachFilter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "not_contacted", label: "Not Contacted" },
+  { value: "sent", label: "Sent" },
+  { value: "replied", label: "Replied" },
+];
+
 export default function DashboardPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [stats, setStats] = useState<Stats | null>(null);
+  const [outreach, setOutreach] = useState<Record<string, OutreachRow>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<FilterMode>("all");
+  const [outreachFilter, setOutreachFilter] = useState<OutreachFilter>("all");
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
   const [running, setRunning] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);
+
+  const loadOutreach = useCallback(async () => {
+    const rows: OutreachRow[] = await fetch("/api/outreach").then((r) => r.json());
+    const map: Record<string, OutreachRow> = {};
+    for (const row of rows) map[row.input] = row;
+    setOutreach(map);
+  }, []);
 
   const loadData = useCallback(async () => {
     try {
@@ -79,10 +103,11 @@ export default function DashboardPage() {
       ]);
       setLeads(leadsData);
       setStats(statsData);
+      await loadOutreach();
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadOutreach]);
 
   useEffect(() => {
     loadData();
@@ -123,6 +148,16 @@ export default function DashboardPage() {
     }
   };
 
+  const handleOutreach = async (lead: Lead, status: string) => {
+    const res = await fetch("/api/outreach", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ input: lead.input, domain: lead.domain, status }),
+    });
+    if (!res.ok) return;
+    await loadOutreach();
+  };
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return leads.filter((lead) => {
@@ -133,9 +168,16 @@ export default function DashboardPage() {
       if (filter === "email" && !lead.email) return false;
       if (filter === "instagram" && !lead.instagram) return false;
       if (filter === "top" && (lead.score ?? 0) < 70) return false;
+
+      if (outreachFilter !== "all") {
+        const status = outreach[lead.input]?.status ?? "pending";
+        if (outreachFilter === "not_contacted" && status !== "pending") return false;
+        if (outreachFilter === "sent" && status !== "sent") return false;
+        if (outreachFilter === "replied" && status !== "replied") return false;
+      }
       return true;
     });
-  }, [leads, search, filter]);
+  }, [leads, search, filter, outreach, outreachFilter]);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -182,6 +224,22 @@ export default function DashboardPage() {
           </select>
         </div>
 
+        <div className="flex flex-wrap gap-2">
+          {OUTREACH_TABS.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setOutreachFilter(tab.value)}
+              className={`rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                outreachFilter === tab.value
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-muted/60 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <Card className="overflow-hidden">
           <Table>
             <TableHeader>
@@ -195,97 +253,139 @@ export default function DashboardPage() {
                 <TableHead>LinkedIn</TableHead>
                 <TableHead>Solo Score</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Compliment</TableHead>
+                <TableHead>Outreach</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading && (
                 <TableRow>
-                  <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={11} className="py-8 text-center text-muted-foreground">
                     Loading leads…
                   </TableCell>
                 </TableRow>
               )}
               {!loading && filtered.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={11} className="py-8 text-center text-muted-foreground">
                     No leads match these filters.
                   </TableCell>
                 </TableRow>
               )}
-              {filtered.map((lead) => (
-                <TableRow key={lead.input}>
-                  <TableCell>
-                    <ScoreBadge score={lead.score} />
-                  </TableCell>
-                  <TableCell className="font-medium text-foreground">
-                    {lead.store_name || "—"}
-                  </TableCell>
-                  <TableCell>
-                    {lead.domain ? (
-                      <a
-                        href={asUrl(lead.domain)!}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-primary hover:underline"
-                      >
-                        {lead.domain}
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {lead.founder_name || "—"}
-                  </TableCell>
-                  <TableCell>
-                    {lead.email ? (
-                      <a
-                        href={`mailto:${lead.email}`}
-                        className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary"
-                        title={lead.email}
-                      >
-                        <Mail className="h-4 w-4" />
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {lead.instagram ? (
-                      <a
-                        href={asUrl(lead.instagram)!}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary"
-                      >
-                        <InstagramIcon className="h-4 w-4" />
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {lead.linkedin ? (
-                      <a
-                        href={asUrl(lead.linkedin)!}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary"
-                      >
-                        <LinkedinIcon className="h-4 w-4" />
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {Math.max(0, Math.min(50, lead.solo_score ?? 0))}/50
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={lead.status} />
-                  </TableCell>
-                </TableRow>
-              ))}
+              {filtered.map((lead) => {
+                const outreachStatus = outreach[lead.input]?.status ?? "pending";
+                return (
+                  <TableRow key={lead.input}>
+                    <TableCell>
+                      <ScoreBadge score={lead.score} />
+                    </TableCell>
+                    <TableCell className="font-medium text-foreground">
+                      {lead.store_name || "—"}
+                    </TableCell>
+                    <TableCell>
+                      {lead.domain ? (
+                        <a
+                          href={asUrl(lead.domain)!}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          {lead.domain}
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {lead.founder_name || "—"}
+                    </TableCell>
+                    <TableCell>
+                      {lead.email ? (
+                        <a
+                          href={`mailto:${lead.email}`}
+                          className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary"
+                          title={lead.email}
+                        >
+                          <Mail className="h-4 w-4" />
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {lead.instagram ? (
+                        <a
+                          href={asUrl(lead.instagram)!}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary"
+                        >
+                          <InstagramIcon className="h-4 w-4" />
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {lead.linkedin ? (
+                        <a
+                          href={asUrl(lead.linkedin)!}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-primary"
+                        >
+                          <LinkedinIcon className="h-4 w-4" />
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {Math.max(0, Math.min(50, lead.solo_score ?? 0))}/50
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={lead.status} />
+                    </TableCell>
+                    <TableCell className="max-w-xs text-xs text-muted-foreground">
+                      {lead.compliment || "—"}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1.5">
+                        <OutreachBadge status={outreachStatus} />
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant={outreachStatus === "sent" ? "default" : "outline"}
+                            disabled={outreachStatus === "sent"}
+                            onClick={() => handleOutreach(lead, "sent")}
+                            title="Mark as sent"
+                          >
+                            <Check className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={outreachStatus === "replied" ? "default" : "outline"}
+                            disabled={outreachStatus === "replied"}
+                            onClick={() => handleOutreach(lead, "replied")}
+                            title="Mark as replied"
+                          >
+                            <Reply className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={outreachStatus === "not_interested" ? "default" : "outline"}
+                            disabled={outreachStatus === "not_interested"}
+                            onClick={() => handleOutreach(lead, "not_interested")}
+                            title="Skip / not interested"
+                          >
+                            <XIcon className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </Card>
