@@ -12,7 +12,7 @@ function Table({ className, ...props }: React.HTMLAttributes<HTMLTableElement>) 
 function TableHeader({ className, ...props }: React.HTMLAttributes<HTMLTableSectionElement>) {
   return (
     <thead
-      className={cn("[&_tr]:border-b [&_tr]:border-zinc-800", className)}
+      className={cn("[&_tr]:border-b [&_tr]:border-border", className)}
       {...props}
     />
   );
@@ -28,7 +28,7 @@ function TableFooter({ className, ...props }: React.HTMLAttributes<HTMLTableSect
   return (
     <tfoot
       className={cn(
-        "border-t border-zinc-800 bg-zinc-900/40 font-medium [&>tr]:last:border-b-0",
+        "border-t border-border bg-muted/40 font-medium [&>tr]:last:border-b-0",
         className,
       )}
       {...props}
@@ -40,7 +40,7 @@ function TableRow({ className, ...props }: React.HTMLAttributes<HTMLTableRowElem
   return (
     <tr
       className={cn(
-        "border-b border-zinc-800 transition-colors hover:bg-zinc-800/40",
+        "border-b border-border transition-colors hover:bg-accent/40",
         className,
       )}
       {...props}
@@ -52,7 +52,7 @@ function TableHead({ className, ...props }: React.ThHTMLAttributes<HTMLTableCell
   return (
     <th
       className={cn(
-        "h-10 px-3 text-left align-middle text-xs font-medium text-zinc-400 whitespace-nowrap",
+        "h-10 px-3 text-left align-middle text-xs font-medium text-muted-foreground whitespace-nowrap",
         className,
       )}
       {...props}
@@ -71,7 +71,7 @@ function TableCell({ className, ...props }: React.TdHTMLAttributes<HTMLTableCell
 
 function TableCaption({ className, ...props }: React.HTMLAttributes<HTMLTableCaptionElement>) {
   return (
-    <caption className={cn("mt-4 text-sm text-zinc-500", className)} {...props} />
+    <caption className={cn("mt-4 text-sm text-muted-foreground", className)} {...props} />
   );
 }
 

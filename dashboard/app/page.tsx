@@ -96,7 +96,7 @@ export default function Home() {
                 whileHover={{
                   scale: 1.05,
                   boxShadow:
-                    "0 20px 40px rgba(0,0,0,0.2), 0 0 25px hsl(var(--primary) / 0.3)",
+                    "0 20px 40px rgba(0,0,0,0.2), 0 0 25px rgba(45, 212, 191, 0.3)",
                   y: -2,
                 }}
                 whileTap={{ scale: 0.98 }}
@@ -119,7 +119,7 @@ export default function Home() {
                 whileHover={{
                   scale: 1.05,
                   boxShadow:
-                    "0 15px 30px rgba(0,0,0,0.1), 0 0 15px hsl(var(--primary) / 0.1)",
+                    "0 15px 30px rgba(0,0,0,0.1), 0 0 15px rgba(45, 212, 191, 0.1)",
                   y: -2,
                 }}
                 whileTap={{ scale: 0.98 }}

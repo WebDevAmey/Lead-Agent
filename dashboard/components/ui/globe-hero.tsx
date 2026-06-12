@@ -5,6 +5,7 @@ import { PerspectiveCamera } from "@react-three/drei";
 import React, { useRef } from "react";
 import * as THREE from "three";
 import { cn } from "@/lib/utils";
+import { StarsBackground } from "@/components/ui/stars-background";
 
 interface DotGlobeHeroProps {
   rotationSpeed?: number;
@@ -31,7 +32,7 @@ const Globe: React.FC<{
     <group ref={groupRef}>
       <mesh>
         <sphereGeometry args={[radius, 64, 64]} />
-        <meshBasicMaterial color="#8b5cf6" transparent opacity={0.18} wireframe />
+        <meshBasicMaterial color="#2dd4bf" transparent opacity={0.18} wireframe />
       </mesh>
     </group>
   );
@@ -45,11 +46,16 @@ const DotGlobeHero = React.forwardRef<HTMLDivElement, DotGlobeHeroProps>(
         className={cn("relative h-screen w-full overflow-hidden bg-background", className)}
         {...props}
       >
+        <StarsBackground
+          className="absolute inset-0 z-0 bg-transparent"
+          starColor="#5eead4"
+        />
+
         <div className="relative z-10 flex h-full flex-col items-center justify-center">
           {children}
         </div>
 
-        <div className="pointer-events-none absolute inset-0 z-0">
+        <div className="pointer-events-none absolute inset-0 z-[1]">
           <Canvas>
             <PerspectiveCamera makeDefault position={[0, 0, 3]} fov={75} />
             <ambientLight intensity={0.5} />

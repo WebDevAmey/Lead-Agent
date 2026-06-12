@@ -83,7 +83,7 @@ function Footer() {
         </div>
 
         <div className="mt-4 flex w-full items-center justify-center">
-          <h1 className="bg-gradient-to-b from-zinc-700 to-zinc-900 bg-clip-text text-center text-3xl font-bold text-transparent select-none md:text-5xl lg:text-[10rem]">
+          <h1 className="bg-gradient-to-b from-muted-foreground/40 to-background bg-clip-text text-center text-3xl font-bold text-transparent select-none md:text-5xl lg:text-[10rem]">
             LeadFinder
           </h1>
         </div>
