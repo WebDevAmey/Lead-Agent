@@ -1,256 +1,140 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { FlickeringGrid } from "@/components/ui/flickering-grid";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
-import { Mail, Search } from "lucide-react";
-import { InstagramIcon, LinkedinIcon } from "@/components/icons";
-import type { Lead } from "@/lib/leads-db";
-
-interface Stats {
-  total: number;
-  done: number;
-  not_shopify: number;
-  pending: number;
-  emails_found: number;
-  instagrams_found: number;
-  avg_score: number;
-}
-
-type FilterMode = "all" | "email" | "instagram" | "top";
-
-function asUrl(value: string | null) {
-  if (!value) return null;
-  return /^https?:\/\//i.test(value) ? value : `https://${value}`;
-}
-
-function ScoreBadge({ score }: { score: number | null }) {
-  const value = Math.round(score ?? 0);
-  const variant = value >= 70 ? "success" : value >= 50 ? "warning" : "destructive";
-  return <Badge variant={variant}>{value}</Badge>;
-}
-
-function StatusBadge({ status }: { status: string | null }) {
-  if (status === "done") return <Badge variant="success">done</Badge>;
-  if (status === "not_shopify") return <Badge variant="default">not_shopify</Badge>;
-  return <Badge variant="warning">pending</Badge>;
-}
-
-function StatCard({ label, value }: { label: string; value: string | number }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{label}</CardTitle>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <span className="text-2xl font-bold text-zinc-100">{value}</span>
-      </CardContent>
-    </Card>
-  );
-}
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight, Zap } from "lucide-react";
+import { DotGlobeHero } from "@/components/ui/globe-hero";
+import { Footer } from "@/components/ui/footer";
 
 export default function Home() {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<FilterMode>("all");
-
-  useEffect(() => {
-    Promise.all([
-      fetch("/api/leads").then((r) => r.json()),
-      fetch("/api/stats").then((r) => r.json()),
-    ])
-      .then(([leadsData, statsData]) => {
-        setLeads(leadsData);
-        setStats(statsData);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return leads.filter((lead) => {
-      if (q) {
-        const haystack = `${lead.store_name ?? ""} ${lead.domain ?? ""}`.toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
-      if (filter === "email" && !lead.email) return false;
-      if (filter === "instagram" && !lead.instagram) return false;
-      if (filter === "top" && (lead.score ?? 0) < 70) return false;
-      return true;
-    });
-  }, [leads, search, filter]);
-
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <header className="relative flex h-48 w-full items-center justify-center overflow-hidden border-b border-zinc-800 bg-zinc-950">
-        <FlickeringGrid
-          className="absolute inset-0"
-          squareSize={4}
-          gridGap={6}
-          color="rgb(124, 58, 237)"
-          maxOpacity={0.25}
-          flickerChance={0.3}
-        />
-        <div className="relative z-10 flex flex-col items-center gap-2 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-50 sm:text-5xl">
-            LeadFinder
-          </h1>
-          <p className="text-sm text-zinc-400 sm:text-base">
-            Shopify Solo Founder Intelligence
-          </p>
-        </div>
-      </header>
+    <>
+      <DotGlobeHero
+        rotationSpeed={0.004}
+        className="bg-gradient-to-br from-background via-background/95 to-muted/10"
+      >
+        <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-background/30" />
+        <div className="absolute top-1/4 left-1/4 h-96 w-96 animate-pulse rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 h-64 w-64 animate-pulse rounded-full bg-primary/3 blur-3xl" />
 
-      <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard label="Total Leads" value={stats?.total ?? "—"} />
-          <StatCard label="Emails Found" value={stats?.emails_found ?? "—"} />
-          <StatCard label="Instagrams Found" value={stats?.instagrams_found ?? "—"} />
-          <StatCard label="Avg Score" value={stats?.avg_score ?? "—"} />
-        </div>
-
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-zinc-500" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search store or domain..."
-              className="w-full rounded-lg border border-zinc-800 bg-zinc-900/60 py-2 pl-9 pr-3 text-sm text-zinc-100 placeholder:text-zinc-500 focus:border-violet-500 focus:outline-none"
-            />
-          </div>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as FilterMode)}
-            className="rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 text-sm text-zinc-100 focus:border-violet-500 focus:outline-none"
+        <div className="relative z-10 mx-auto max-w-5xl space-y-12 px-6 py-12 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="space-y-8"
           >
-            <option value="all">All</option>
-            <option value="email">Has Email</option>
-            <option value="instagram">Has Instagram</option>
-            <option value="top">Score 70+</option>
-          </select>
-        </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative inline-flex items-center gap-3 rounded-full border border-primary/30 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 px-6 py-3 shadow-2xl backdrop-blur-xl"
+            >
+              <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-r from-primary/10 via-transparent to-primary/10" />
+              <div className="h-2 w-2 animate-ping rounded-full bg-primary" />
+              <span className="relative z-10 text-sm font-bold tracking-wider text-primary uppercase">
+                Lead Intelligence
+              </span>
+              <div className="h-2 w-2 animate-ping rounded-full bg-primary [animation-delay:500ms]" />
+            </motion.div>
 
-        <Card className="overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Score</TableHead>
-                <TableHead>Store Name</TableHead>
-                <TableHead>Domain</TableHead>
-                <TableHead>Founder</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Instagram</TableHead>
-                <TableHead>LinkedIn</TableHead>
-                <TableHead>Solo Score</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading && (
-                <TableRow>
-                  <TableCell colSpan={9} className="py-8 text-center text-zinc-500">
-                    Loading leads…
-                  </TableCell>
-                </TableRow>
-              )}
-              {!loading && filtered.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={9} className="py-8 text-center text-zinc-500">
-                    No leads match these filters.
-                  </TableCell>
-                </TableRow>
-              )}
-              {filtered.map((lead) => (
-                <TableRow key={lead.input}>
-                  <TableCell>
-                    <ScoreBadge score={lead.score} />
-                  </TableCell>
-                  <TableCell className="font-medium text-zinc-100">
-                    {lead.store_name || "—"}
-                  </TableCell>
-                  <TableCell>
-                    {lead.domain ? (
-                      <a
-                        href={asUrl(lead.domain)!}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-violet-400 hover:underline"
-                      >
-                        {lead.domain}
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell className="text-zinc-400">
-                    {lead.founder_name || "—"}
-                  </TableCell>
-                  <TableCell>
-                    {lead.email ? (
-                      <a
-                        href={`mailto:${lead.email}`}
-                        className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-violet-400"
-                        title={lead.email}
-                      >
-                        <Mail className="h-4 w-4" />
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {lead.instagram ? (
-                      <a
-                        href={asUrl(lead.instagram)!}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-violet-400"
-                      >
-                        <InstagramIcon className="h-4 w-4" />
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {lead.linkedin ? (
-                      <a
-                        href={asUrl(lead.linkedin)!}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-violet-400"
-                      >
-                        <LinkedinIcon className="h-4 w-4" />
-                      </a>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell className="text-zinc-400">
-                    {Math.max(0, Math.min(50, lead.solo_score ?? 0))}/50
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={lead.status} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
-      </main>
-    </div>
+            <div className="space-y-6">
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.3 }}
+                className="text-5xl font-black tracking-tighter leading-[0.85] select-none md:text-7xl lg:text-8xl xl:text-9xl"
+              >
+                <span className="mb-3 block text-4xl font-light text-foreground/70 md:text-6xl lg:text-7xl">
+                  Find
+                </span>
+                <span className="relative block">
+                  <span className="relative z-10 bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text font-black text-transparent">
+                    Solo Founders
+                  </span>
+                  <div className="absolute inset-0 scale-105 bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text font-black text-transparent opacity-50 blur-2xl">
+                    Solo Founders
+                  </div>
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 1.5, delay: 1.2, ease: "easeOut" }}
+                    className="absolute -bottom-6 left-0 h-3 rounded-full bg-gradient-to-r from-primary via-primary/80 to-transparent shadow-lg shadow-primary/50"
+                  />
+                </span>
+              </motion.h1>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="mx-auto max-w-3xl space-y-4"
+            >
+              <p className="text-xl leading-relaxed font-medium text-muted-foreground md:text-2xl">
+                Discover and score independent Shopify store owners with our{" "}
+                <span className="rounded-md bg-gradient-to-r from-primary/20 to-primary/10 px-2 py-1 font-semibold text-foreground">
+                  automated lead-finding agent
+                </span>
+              </p>
+              <p className="text-lg leading-relaxed text-muted-foreground/80">
+                Crawl stores, extract contact info, and rank prospects by how
+                likely they are run by a single founder — all from one
+                dashboard.
+              </p>
+            </motion.div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 1 }}
+            className="flex flex-col items-center justify-center gap-6 pt-4 sm:flex-row"
+          >
+            <Link href="/dashboard">
+              <motion.button
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow:
+                    "0 20px 40px rgba(0,0,0,0.2), 0 0 25px hsl(var(--primary) / 0.3)",
+                  y: -2,
+                }}
+                whileTap={{ scale: 0.98 }}
+                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-r from-primary via-primary to-primary/90 px-8 py-4 text-lg font-semibold text-primary-foreground shadow-xl transition-all duration-500 hover:shadow-primary/30"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                  initial={{ x: "-100%" }}
+                  whileHover={{ x: "100%" }}
+                  transition={{ duration: 0.8 }}
+                />
+                <span className="relative z-10 tracking-wide">Open Dashboard</span>
+                <ArrowRight className="relative z-10 h-5 w-5 transition-transform duration-300 group-hover:translate-x-2" />
+              </motion.button>
+            </Link>
+
+            <a href="#how-it-works">
+              <motion.button
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow:
+                    "0 15px 30px rgba(0,0,0,0.1), 0 0 15px hsl(var(--primary) / 0.1)",
+                  y: -2,
+                }}
+                whileTap={{ scale: 0.98 }}
+                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-xl border-2 border-border/40 bg-background/60 px-8 py-4 text-lg font-semibold shadow-lg backdrop-blur-xl transition-all duration-500 hover:border-primary/40 hover:bg-background/90"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                <Zap className="relative z-10 h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6" />
+                <span className="relative z-10 tracking-wide">How It Works</span>
+              </motion.button>
+            </a>
+          </motion.div>
+        </div>
+      </DotGlobeHero>
+
+      <Footer />
+    </>
   );
 }
