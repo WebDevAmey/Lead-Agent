@@ -12,7 +12,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-import { Mail, Search, Play, Loader2, Check, Reply, X as XIcon } from "lucide-react";
+import { Mail, Search, Play, Loader2, Check, Reply, X as XIcon, Download } from "lucide-react";
 import { InstagramIcon, LinkedinIcon } from "@/components/icons";
 import { RunDrawer } from "@/components/run-drawer";
 import type { Lead, OutreachRow } from "@/lib/leads-db";
@@ -148,6 +148,55 @@ export default function DashboardPage() {
     }
   };
 
+  const handleExport = () => {
+    const headers = [
+      "score",
+      "store_name",
+      "domain",
+      "founder_name",
+      "email",
+      "instagram",
+      "linkedin",
+      "solo_score",
+      "status",
+      "compliment",
+      "outreach_status",
+    ];
+
+    const escapeCsv = (value: unknown) => {
+      const str = value === null || value === undefined ? "" : String(value);
+      if (/[",\n]/.test(str)) return `"${str.replace(/"/g, '""')}"`;
+      return str;
+    };
+
+    const rows = filtered.map((lead) =>
+      [
+        lead.score ?? "",
+        lead.store_name ?? "",
+        lead.domain ?? "",
+        lead.founder_name ?? "",
+        lead.email ?? "",
+        lead.instagram ?? "",
+        lead.linkedin ?? "",
+        lead.solo_score ?? "",
+        lead.status ?? "",
+        lead.compliment ?? "",
+        outreach[lead.input]?.status ?? "pending",
+      ]
+        .map(escapeCsv)
+        .join(","),
+    );
+
+    const csv = [headers.join(","), ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `leads-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   const handleOutreach = async (lead: Lead, status: string) => {
     const res = await fetch("/api/outreach", {
       method: "POST",
@@ -212,16 +261,22 @@ export default function DashboardPage() {
               className="w-full rounded-lg border border-border bg-muted/60 py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none"
             />
           </div>
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as FilterMode)}
-            className="rounded-lg border border-border bg-muted/60 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
-          >
-            <option value="all">All</option>
-            <option value="email">Has Email</option>
-            <option value="instagram">Has Instagram</option>
-            <option value="top">Score 70+</option>
-          </select>
+          <div className="flex items-center gap-2">
+            <select
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as FilterMode)}
+              className="rounded-lg border border-border bg-muted/60 px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
+            >
+              <option value="all">All</option>
+              <option value="email">Has Email</option>
+              <option value="instagram">Has Instagram</option>
+              <option value="top">Score 70+</option>
+            </select>
+            <Button variant="outline" onClick={handleExport} disabled={filtered.length === 0}>
+              <Download className="h-4 w-4" />
+              Export CSV
+            </Button>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2">
