@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { LogoIcon } from "@/components/icons";
 import { Footer } from "@/components/ui/footer";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard" },
@@ -54,13 +55,14 @@ export default function Home() {
               ))}
             </div>
 
-            <div className="hidden lg:flex">
+            <div className="hidden lg:flex lg:items-center lg:gap-4">
               <Link
                 href="/dashboard"
                 className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground hover:text-primary"
               >
                 Open Dashboard <ArrowRight className="h-4 w-4" />
               </Link>
+              <ThemeToggle />
             </div>
           </nav>
 
@@ -98,6 +100,9 @@ export default function Home() {
                 >
                   Open Dashboard
                 </Link>
+                <div className="px-3 pt-2">
+                  <ThemeToggle />
+                </div>
               </div>
             </div>
           )}

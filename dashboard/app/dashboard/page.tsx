@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import {
 import { Mail, Search, Play, Loader2, Check, Reply, X as XIcon, Download } from "lucide-react";
 import { InstagramIcon, LinkedinIcon } from "@/components/icons";
 import { RunDrawer } from "@/components/run-drawer";
+import { ThemeToggle } from "@/components/theme-toggle";
 import type { Lead, OutreachRow } from "@/lib/leads-db";
 
 interface Stats {
@@ -232,15 +234,23 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background text-foreground">
       <main className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-bold text-foreground">Lead Dashboard</h1>
-          <Button onClick={handleRun} disabled={running}>
-            {running ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Play className="h-4 w-4" />
-            )}
-            {running ? "Running…" : "Run Agent"}
-          </Button>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground">
+              ← Home
+            </Link>
+            <h1 className="text-xl font-bold text-foreground">Lead Dashboard</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button onClick={handleRun} disabled={running}>
+              {running ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+              {running ? "Running…" : "Run Agent"}
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
