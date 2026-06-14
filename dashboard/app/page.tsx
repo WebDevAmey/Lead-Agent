@@ -1,138 +1,145 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowRight, Zap } from "lucide-react";
-import { DotGlobeHero } from "@/components/ui/globe-hero";
+import { ArrowRight, Menu, X } from "lucide-react";
+import { LogoIcon } from "@/components/icons";
 import { Footer } from "@/components/ui/footer";
 
+const navigation = [
+  { name: "Dashboard", href: "/dashboard" },
+  { name: "How it works", href: "#how-it-works" },
+];
+
 export default function Home() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <>
-      <DotGlobeHero
-        rotationSpeed={0.004}
-        className="bg-gradient-to-br from-background via-background/95 to-muted/10"
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-background/30" />
-        <div className="absolute top-1/4 left-1/4 h-96 w-96 animate-pulse rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 h-64 w-64 animate-pulse rounded-full bg-primary/3 blur-3xl" />
+      <div className="relative isolate overflow-hidden bg-background">
+        <div
+          aria-hidden="true"
+          className="absolute top-0 right-0 -z-10 h-[40rem] w-[40rem] translate-x-1/3 -translate-y-1/3 rounded-full bg-primary/10 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="absolute bottom-0 left-0 -z-10 h-[30rem] w-[30rem] -translate-x-1/3 translate-y-1/3 rounded-full bg-primary/5 blur-3xl"
+        />
 
-        <div className="relative z-10 mx-auto max-w-5xl space-y-12 px-6 py-12 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="space-y-8"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative inline-flex items-center gap-3 rounded-full border border-primary/30 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 px-6 py-3 shadow-2xl backdrop-blur-xl"
-            >
-              <div className="absolute inset-0 animate-pulse rounded-full bg-gradient-to-r from-primary/10 via-transparent to-primary/10" />
-              <div className="h-2 w-2 animate-ping rounded-full bg-primary" />
-              <span className="relative z-10 text-sm font-bold tracking-wider text-primary uppercase">
-                Lead Intelligence
-              </span>
-              <div className="h-2 w-2 animate-ping rounded-full bg-primary [animation-delay:500ms]" />
-            </motion.div>
-
-            <div className="space-y-6">
-              <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.3 }}
-                className="text-5xl font-black tracking-tighter leading-[0.85] select-none md:text-7xl lg:text-8xl xl:text-9xl"
-              >
-                <span className="mb-3 block text-4xl font-light text-foreground/70 md:text-6xl lg:text-7xl">
-                  Find
-                </span>
-                <span className="relative block">
-                  <span className="relative z-10 bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text font-black text-transparent">
-                    Solo Founders
-                  </span>
-                  <div className="absolute inset-0 scale-105 bg-gradient-to-br from-primary via-primary to-primary/60 bg-clip-text font-black text-transparent opacity-50 blur-2xl">
-                    Solo Founders
-                  </div>
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: "100%" }}
-                    transition={{ duration: 1.5, delay: 1.2, ease: "easeOut" }}
-                    className="absolute -bottom-6 left-0 h-3 rounded-full bg-gradient-to-r from-primary via-primary/80 to-transparent shadow-lg shadow-primary/50"
-                  />
-                </span>
-              </motion.h1>
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-              className="mx-auto max-w-3xl space-y-4"
-            >
-              <p className="text-xl leading-relaxed font-medium text-muted-foreground md:text-2xl">
-                Discover and score independent Shopify store owners with our{" "}
-                <span className="rounded-md bg-gradient-to-r from-primary/20 to-primary/10 px-2 py-1 font-semibold text-foreground">
-                  automated lead-finding agent
-                </span>
-              </p>
-              <p className="text-lg leading-relaxed text-muted-foreground/80">
-                Crawl stores, extract contact info, and rank prospects by how
-                likely they are run by a single founder — all from one
-                dashboard.
-              </p>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1 }}
-            className="flex flex-col items-center justify-center gap-6 pt-4 sm:flex-row"
-          >
-            <Link href="/dashboard">
-              <motion.button
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow:
-                    "0 20px 40px rgba(0,0,0,0.2), 0 0 25px rgba(45, 212, 191, 0.3)",
-                  y: -2,
-                }}
-                whileTap={{ scale: 0.98 }}
-                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-r from-primary via-primary to-primary/90 px-8 py-4 text-lg font-semibold text-primary-foreground shadow-xl transition-all duration-500 hover:shadow-primary/30"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                  initial={{ x: "-100%" }}
-                  whileHover={{ x: "100%" }}
-                  transition={{ duration: 0.8 }}
-                />
-                <span className="relative z-10 tracking-wide">Open Dashboard</span>
-                <ArrowRight className="relative z-10 h-5 w-5 transition-transform duration-300 group-hover:translate-x-2" />
-              </motion.button>
+        <header className="relative z-10">
+          <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
+            <Link href="/" className="flex items-center gap-2">
+              <LogoIcon className="h-7 w-7 text-primary" />
+              <span className="text-lg font-bold text-foreground">LeadFinder</span>
             </Link>
 
-            <a href="#how-it-works">
-              <motion.button
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow:
-                    "0 15px 30px rgba(0,0,0,0.1), 0 0 15px rgba(45, 212, 191, 0.1)",
-                  y: -2,
-                }}
-                whileTap={{ scale: 0.98 }}
-                className="group relative inline-flex items-center gap-3 overflow-hidden rounded-xl border-2 border-border/40 bg-background/60 px-8 py-4 text-lg font-semibold shadow-lg backdrop-blur-xl transition-all duration-500 hover:border-primary/40 hover:bg-background/90"
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-foreground lg:hidden"
+            >
+              <span className="sr-only">Open main menu</span>
+              <Menu className="h-6 w-6" />
+            </button>
+
+            <div className="hidden lg:flex lg:gap-x-8">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="text-sm font-semibold text-muted-foreground hover:text-foreground"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+
+            <div className="hidden lg:flex">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground hover:text-primary"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                <Zap className="relative z-10 h-5 w-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6" />
-                <span className="relative z-10 tracking-wide">How It Works</span>
-              </motion.button>
+                Open Dashboard <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </nav>
+
+          {mobileMenuOpen && (
+            <div className="fixed inset-0 z-50 bg-background lg:hidden">
+              <div className="flex items-center justify-between p-6">
+                <Link href="/" className="flex items-center gap-2">
+                  <LogoIcon className="h-7 w-7 text-primary" />
+                  <span className="text-lg font-bold text-foreground">LeadFinder</span>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="-m-2.5 rounded-md p-2.5 text-foreground"
+                >
+                  <span className="sr-only">Close menu</span>
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+              <div className="flex flex-col gap-2 px-6 py-4">
+                {navigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="rounded-lg px-3 py-2 text-base font-semibold text-foreground hover:bg-muted"
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="rounded-lg px-3 py-2 text-base font-semibold text-primary hover:bg-muted"
+                >
+                  Open Dashboard
+                </Link>
+              </div>
+            </div>
+          )}
+        </header>
+
+        <main className="relative z-10 mx-auto max-w-4xl px-6 py-32 text-center sm:py-40 lg:px-8">
+          <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-border bg-muted/60 px-4 py-1.5 text-sm text-muted-foreground">
+            <span className="h-2 w-2 rounded-full bg-primary" />
+            Lead Intelligence for Shopify
+          </div>
+
+          <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-7xl">
+            Find{" "}
+            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Solo Founders
+            </span>
+          </h1>
+
+          <p className="mt-6 text-lg leading-8 text-muted-foreground">
+            Discover and score independent Shopify store owners with an
+            automated lead-finding agent. Crawl stores, extract contact info,
+            and rank prospects by how likely they are run by a single founder —
+            all from one dashboard.
+          </p>
+
+          <div className="mt-10 flex items-center justify-center gap-x-6">
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+            >
+              Open Dashboard
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <a
+              href="#how-it-works"
+              className="text-sm font-semibold text-foreground hover:text-primary"
+            >
+              How it works
             </a>
-          </motion.div>
-        </div>
-      </DotGlobeHero>
+          </div>
+        </main>
+      </div>
 
       <Footer />
     </>
