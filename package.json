@@ -12,6 +12,7 @@
     "seed": "node seed.js",
     "schedule": "node scheduler.js",
     "backfill-compliments": "node backfill-compliments.js",
+    "import-html": "node import-html.js",
     "dashboard": "cd dashboard && npm run dev"
   },
   "dependencies": {
