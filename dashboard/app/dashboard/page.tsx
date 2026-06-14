@@ -181,7 +181,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6">
+      <main className="mx-auto flex max-w-[1600px] flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-bold text-foreground">Lead Dashboard</h1>
           <Button onClick={handleRun} disabled={running}>
@@ -275,7 +275,7 @@ export default function DashboardPage() {
               {filtered.map((lead) => {
                 const outreachStatus = outreach[lead.input]?.status ?? "pending";
                 return (
-                  <TableRow key={lead.input}>
+                  <TableRow key={lead.input} className="[&>td]:align-top">
                     <TableCell>
                       <ScoreBadge score={lead.score} />
                     </TableCell>
@@ -346,7 +346,7 @@ export default function DashboardPage() {
                     <TableCell>
                       <StatusBadge status={lead.status} />
                     </TableCell>
-                    <TableCell className="max-w-xs text-xs text-muted-foreground">
+                    <TableCell className="w-[260px] max-w-[260px] min-w-[200px] whitespace-normal break-words text-xs text-muted-foreground">
                       {lead.compliment || "—"}
                     </TableCell>
                     <TableCell>
