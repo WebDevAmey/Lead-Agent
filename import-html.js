@@ -1,6 +1,7 @@
 import { readFileSync, appendFileSync, existsSync } from 'node:fs';
 import { load } from 'cheerio';
 import { verifyShopify } from './lib/shopify.js';
+import { openDB, upsertInput, updateLead } from './lib/db.js';
 
 const INPUT_FILE = 'input.txt';
 const FILES = ['plus.html', 'india.html'];
@@ -32,13 +33,6 @@ function extractDomains(html) {
   $('tr[data-domain]').each((_, el) => {
     const domain = $(el).attr('data-domain')?.toLowerCase().trim();
     if (!domain) return;
-    if (domain.endsWith('.myshopify.com')) return;
-
-    // first td[data-value] is the domain itself, second is the country code;
-    // the rest are the numeric stat columns.
-    const stats = $(el).find('td[data-value]').slice(2).map((__, td) => $(td).attr('data-value')).get();
-    if (stats.length > 0 && stats.every(v => v === '-1')) return;
-
     domains.add(domain);
   });
 
@@ -46,7 +40,7 @@ function extractDomains(html) {
 }
 
 const existing = loadExistingDomains();
-const candidates = new Set();
+const domainSource = new Map();
 
 for (const file of FILES) {
   if (!existsSync(file)) {
@@ -56,11 +50,22 @@ for (const file of FILES) {
   const html = readFileSync(file, 'utf8');
   const domains = extractDomains(html);
   console.log(`${file}: ${domains.length} candidate domain(s)`);
-  domains.forEach(d => candidates.add(d));
+  domains.forEach(d => domainSource.set(d, file));
 }
 
-const toCheck = [...candidates].filter(d => !existing.has(d));
-console.log(`\n${candidates.size} total candidates, ${toCheck.length} not already in input.txt\n`);
+openDB();
+
+let backfilled = 0;
+for (const domain of existing) {
+  const source = domainSource.get(domain);
+  if (source) {
+    updateLead(domain, { source });
+    backfilled++;
+  }
+}
+
+const toCheck = [...domainSource.keys()].filter(d => !existing.has(d));
+console.log(`\n${domainSource.size} total candidates, ${toCheck.length} not already in input.txt, ${backfilled} backfilled with source\n`);
 
 const newDomains = [];
 
@@ -70,6 +75,8 @@ async function processDomain(domain) {
   if (result) {
     console.log(`  ✓ shopify`);
     newDomains.push(domain);
+    upsertInput(domain);
+    updateLead(domain, { source: domainSource.get(domain) });
   } else {
     console.log(`  ✗ skip`);
   }
@@ -95,6 +102,6 @@ if (newDomains.length > 0) {
 }
 
 console.log('\n── Summary ──');
-console.log(`  Domains found in HTML: ${candidates.size}`);
+console.log(`  Domains found in HTML: ${domainSource.size}`);
 console.log(`  Checked for Shopify: ${toCheck.length}`);
 console.log(`  New domains added: ${newDomains.length}`);

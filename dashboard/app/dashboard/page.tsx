@@ -171,7 +171,7 @@ export default function DashboardPage() {
       return str;
     };
 
-    const rows = filtered.map((lead) =>
+    const toRow = (lead: Lead) =>
       [
         lead.score ?? "",
         lead.store_name ?? "",
@@ -186,10 +186,18 @@ export default function DashboardPage() {
         outreach[lead.input]?.status ?? "pending",
       ]
         .map(escapeCsv)
-        .join(","),
-    );
+        .join(",");
 
-    const csv = [headers.join(","), ...rows].join("\n");
+    const sourceGroups: (string | null)[] = ["plus.html", "india.html", null];
+    const lines = [headers.join(",")];
+    for (const source of sourceGroups) {
+      const group = filtered.filter((lead) => (lead.source ?? null) === source);
+      if (!group.length) continue;
+      if (lines.length > 1) lines.push("");
+      for (const lead of group) lines.push(toRow(lead));
+    }
+
+    const csv = lines.join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");

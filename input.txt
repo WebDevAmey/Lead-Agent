@@ -156,3 +156,12 @@ gemsupchar.in
 srmarket24.in
 quikhenna.com
 satvafarm.com
+
+# Imported from HTML 2026-06-18
+gma-cozy-earth.myshopify.com
+
+# Imported from HTML 2026-06-18
+amp-demo-shop.myshopify.com
+krogerheartbeats.myshopify.com
+aero-theme.myshopify.com
+spec-ops-shard-1.myshopify.com

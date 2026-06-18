@@ -56,6 +56,7 @@ export interface Lead {
   contact_form_url: string | null;
   contact_url: string | null;
   compliment: string | null;
+  source: string | null;
 }
 
 export interface OutreachRow {

@@ -100,13 +100,20 @@ async function runPool(rows) {
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 }
 
+const SOURCE_GROUPS = ['plus.html', 'india.html', null];
+
 async function exportCSV() {
   const leads = getAllLeads();
   if (!leads.length) return;
   const headers = Object.keys(leads[0]);
   const lines = [headers.join(',')];
-  for (const row of leads) {
-    lines.push(headers.map(h => JSON.stringify(row[h] ?? '')).join(','));
+  for (const source of SOURCE_GROUPS) {
+    const group = leads.filter(row => (row.source ?? null) === source);
+    if (!group.length) continue;
+    if (lines.length > 1) lines.push('');
+    for (const row of group) {
+      lines.push(headers.map(h => JSON.stringify(row[h] ?? '')).join(','));
+    }
   }
   writeFileSync('leads.csv', lines.join('\n'));
   console.log(`\n📄 Exported ${leads.length} rows to leads.csv`);
